@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FURINA studies with you</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+      body {
+        background: linear-gradient(to right, #50c8b1, #50c8b1);
+        background-image: url("furina.jpg");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        background-size: contain;
+        min-height: 100vh;
+        color: #fff;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      nav {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+      }
+      .menu-icon {
+        font-size: 26px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: black;
+      }
+      .menu {
+        display: none;
+        position: absolute;
+        top: 45px;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        list-style: none;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+      .menu li {
+        padding: 10px 20px;
+        cursor: pointer;
+        color: black;
+      }
+      .menu li:hover {
+        background: #eee;
+      }
+      .content {
+        display: none;
+        text-align: center;
+        margin-top: 40px;
+        max-width: 500px;
+        width: 100%;
+      }
+      .active {
+        display: block;
+      }
+      h1,
+      h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        text-shadow: 1px 1px 3px black;
+      }
+      #vocab-list {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        color: black;
+        text-align: left;
+      }
+      .question-box {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        color: black;
+      }
+      .answers button {
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        background: #eee;
+        cursor: pointer;
+      }
+      .answers button:hover {
+        background: #ddd;
+      }
+      .summary,
+      .status-bar {
+        margin-top: 20px;
+        font-size: 18px;
+      }
+      .buttons {
+        margin-top: 20px;
+      }
+      .buttons button {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: white;
+        color: black;
+      }
+      #exit-btn {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 50, 50, 0.9);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 10;
+        display: none;
+      }
+      @media (max-width: 600px) {
+        h1,
+        h2 {
+          font-size: 20px;
+        }
+        .answers button,
+        .menu li {
+          font-size: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button id="exit-btn" onclick="showPage('home')">❌ Thoát</button>
+    <nav>
+      <div class="menu-icon" onclick="toggleMenu()">☰</div>
+      <ul class="menu" id="menu">
+        <li onclick="showPage('home')">Trang chủ</li>
+        <li onclick="showPage('vocab')">Từ vựng</li>
+        <li onclick="showPage('game')">Luyện tập</li>
+      </ul>
+    </nav>
+
+    <div class="content active" id="home">
+      <h1 style="margin-top: 60px">🎓 Chào mừng!</h1>
+      <p>Chọn mục trên menu để bắt đầu.</p>
+    </div>
+
+    <div class="content" id="vocab">
+      <h2>📘 Danh sách từ vựng</h2>
+      <ul id="vocab-list"></ul>
+    </div>
+
+    <div class="content" id="game">
+      <h2>🧠 Trò chơi luyện tập</h2>
+      <div class="status-bar" id="status"></div>
+      <div class="question-box" id="question-box">
+        <div id="question">Câu hỏi...</div>
+        <div class="answers" id="answers"></div>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div class="buttons" id="end-buttons" style="display: none">
+        <button onclick="showPage('home')">🏠 Trang chủ</button>
+        <button onclick="showPage('vocab')">📘 Từ vựng</button>
+        <button onclick="startGame()">🔁 Chơi lại</button>
+      </div>
+    </div>
+
+    <script>
+      const words = [
+        { en: "apple", vi: "quả táo" },
+        { en: "dog", vi: "con chó" },
+        { en: "cat", vi: "con mèo" },
+        { en: "house", vi: "ngôi nhà" },
+        { en: "school", vi: "trường học" },
+        { en: "book", vi: "quyển sách" },
+        { en: "car", vi: "xe hơi" },
+        { en: "banana", vi: "quả chuối" },
+        { en: "teacher", vi: "giáo viên" },
+        { en: "student", vi: "học sinh" },
+
+        { en: "water", vi: "nước" },
+        { en: "milk", vi: "sữa" },
+        { en: "bread", vi: "bánh mì" },
+        { en: "chair", vi: "ghế" },
+        { en: "table", vi: "bàn" },
+        { en: "window", vi: "cửa sổ" },
+        { en: "door", vi: "cánh cửa" },
+        { en: "sun", vi: "mặt trời" },
+        { en: "moon", vi: "mặt trăng" },
+        { en: "star", vi: "ngôi sao" },
+
+        { en: "pen", vi: "bút mực" },
+        { en: "pencil", vi: "bút chì" },
+        { en: "notebook", vi: "sổ tay" },
+        { en: "bag", vi: "cái túi" },
+        { en: "shirt", vi: "áo sơ mi" },
+        { en: "pants", vi: "quần dài" },
+        { en: "shoes", vi: "giày" },
+        { en: "hat", vi: "mũ" },
+        { en: "clock", vi: "đồng hồ" },
+        { en: "phone", vi: "điện thoại" },
+
+        { en: "bed", vi: "giường" },
+        { en: "pillow", vi: "gối" },
+        { en: "blanket", vi: "chăn" },
+        { en: "floor", vi: "sàn nhà" },
+        { en: "wall", vi: "bức tường" },
+        { en: "ceiling", vi: "trần nhà" },
+        { en: "light", vi: "ánh sáng" },
+        { en: "fan", vi: "quạt" },
+        { en: "television", vi: "tivi" },
+        { en: "computer", vi: "máy tính" },
+
+        { en: "mouse", vi: "chuột" },
+        { en: "keyboard", vi: "bàn phím" },
+        { en: "doctor", vi: "bác sĩ" },
+        { en: "nurse", vi: "y tá" },
+        { en: "hospital", vi: "bệnh viện" },
+        { en: "market", vi: "chợ" },
+        { en: "restaurant", vi: "nhà hàng" },
+        { en: "food", vi: "thức ăn" },
+        { en: "drink", vi: "đồ uống" },
+        { en: "juice", vi: "nước ép" },
+
+        { en: "coffee", vi: "cà phê" },
+        { en: "tea", vi: "trà" },
+        { en: "rice", vi: "cơm" },
+        { en: "fish", vi: "cá" },
+        { en: "chicken", vi: "gà" },
+        { en: "egg", vi: "trứng" },
+        { en: "meat", vi: "thịt" },
+        { en: "vegetable", vi: "rau" },
+        { en: "fruit", vi: "trái cây" },
+        { en: "soup", vi: "súp" },
+      ];
+
+      let currentQuestion = 0,
+        lives = 5,
+        gameWords = [];
+
+      function toggleMenu() {
+        const menu = document.getElementById("menu");
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+      }
+
+      function showPage(id) {
+        document
+          .querySelectorAll(".content")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document.getElementById("menu").style.display = "none";
+        document.getElementById("exit-btn").style.display =
+          id === "game" ? "block" : "none";
+        if (id === "vocab") showVocab();
+        if (id === "game") startGame();
+      }
+
+      function showVocab() {
+        const list = document.getElementById("vocab-list");
+        list.innerHTML = "";
+        words.forEach((w) => {
+          const li = document.createElement("li");
+          li.textContent = `${w.en} - ${w.vi}`;
+          list.appendChild(li);
+        });
+      }
+
+      function startGame() {
+        currentQuestion = 0;
+        lives = 5;
+        gameWords = shuffleArray([...words]).slice(0, 20);
+        document.getElementById("summary").textContent = "";
+        document.getElementById("end-buttons").style.display = "none";
+        document.getElementById("question-box").style.display = "block";
+        nextQuestion();
+      }
+
+      function nextQuestion() {
+        if (lives <= 0 || currentQuestion >= gameWords.length) return endGame();
+        const q = gameWords[currentQuestion];
+        const isEnToVi = Math.random() > 0.5;
+        const correct = isEnToVi ? q.vi : q.en;
+        const questionText = isEnToVi
+          ? `Từ "${q.en}" nghĩa là gì?`
+          : `Từ "${q.vi}" là gì trong tiếng Anh?`;
+        document.getElementById(
+          "status"
+        ).textContent = `❤️ Mạng: ${lives} | 🔢 Câu: ${currentQuestion + 1}/${
+          gameWords.length
+        }`;
+        document.getElementById("question").textContent = questionText;
+
+        const allAnswers = shuffleArray([q, ...pickRandomWords(q, 3)]).map(
+          (w) => (isEnToVi ? w.vi : w.en)
+        );
+
+        const answerBox = document.getElementById("answers");
+        answerBox.innerHTML = "";
+        allAnswers.forEach((ans) => {
+          const btn = document.createElement("button");
+          btn.textContent = ans;
+          btn.onclick = () => {
+            if (ans === correct) {
+              currentQuestion++;
+              nextQuestion();
+            } else {
+              showWrongAnswerPopup(() => {
+                lives--;
+                lives <= 0 ? endGame() : nextQuestion();
+              });
+            }
+          };
+          answerBox.appendChild(btn);
+        });
+      }
+
+      function showWrongAnswerPopup(callback) {
+        const popup = document.createElement("div");
+        popup.style = `
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff; color: #000;
+        padding: 20px; border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      `;
+        popup.innerHTML = `
+        <p>❌ Bạn đã trả lời sai!</p>
+        <button style="margin-top:10px;padding:5px 15px;
+          border:none;background:#333;color:#fff;
+          border-radius:5px;cursor:pointer;">Đóng</button>
+      `;
+        document.body.appendChild(popup);
+        document
+          .querySelectorAll("#answers button")
+          .forEach((btn) => (btn.disabled = true));
+        popup.querySelector("button").onclick = () => {
+          document.body.removeChild(popup);
+          callback();
+          document
+            .querySelectorAll("#answers button")
+            .forEach((btn) => (btn.disabled = false));
+        };
+      }
+
+      function endGame() {
+        document.getElementById("question-box").style.display = "none";
+        document.getElementById("status").textContent = "";
+        document.getElementById(
+          "summary"
+        ).textContent = `🎉 Kết thúc! Bạn trả lời đúng ${currentQuestion} / ${gameWords.length} câu.`;
+        document.getElementById("end-buttons").style.display = "block";
+      }
+
+      function shuffleArray(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+      }
+
+      function pickRandomWords(exclude, count) {
+        return shuffleArray(words.filter((w) => w !== exclude)).slice(0, count);
+      }
+    </script>
+  </body>
+</html>
