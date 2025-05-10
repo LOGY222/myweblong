@@ -376,5 +376,74 @@
         return shuffleArray(words.filter((w) => w !== exclude)).slice(0, count);
       }
     </script>
+    <audio id="backgroundMusic" autoplay hidden></audio>
+    <script>
+      const musicMap = {
+        5: ["music/folder5/yung kai - blue (Lyrics).mp3"],
+        4: ["music/folder4/tous les mêmes.mp3"],
+        3: ["music/folder3/SLAVA.mp3"],
+        2: ["music/folder2/7 Years.mp3"],
+        1: ["music/folder1/Spider Dance.mp3"],
+      };
+
+      // Hàm phát nhạc tùy theo số tim
+      function playMusicByHeart(heartCount, questionNumber) {
+        if (questionNumber >= 2 && heartCount >= 1 && heartCount <= 5) {
+          const musicList = musicMap[heartCount];
+          if (musicList && musicList.length > 0) {
+            const randomIndex = Math.floor(Math.random() * musicList.length);
+            const musicPath = musicList[randomIndex];
+
+            const audio = document.getElementById("backgroundMusic");
+            audio.src = musicPath;
+            audio.play();
+          }
+        }
+      }
+
+      // Cập nhật lại hàm nextQuestion để gọi playMusicByHeart
+      function nextQuestion() {
+        if (lives <= 0 || currentQuestion >= gameWords.length) return endGame();
+
+        // Phát nhạc theo số tim hiện tại
+        playMusicByHeart(lives, currentQuestion + 1);
+
+        const q = gameWords[currentQuestion];
+        const isEnToVi = Math.random() > 0.5;
+        const correct = isEnToVi ? q.vi : q.en;
+        const questionText = isEnToVi
+          ? `Từ "${q.en}" nghĩa là gì?`
+          : `Từ "${q.vi}" là gì trong tiếng Anh?`;
+        document.getElementById(
+          "status"
+        ).textContent = `❤️ Mạng: ${lives} | 🔢 Câu: ${currentQuestion + 1}/${
+          gameWords.length
+        }`;
+        document.getElementById("question").textContent = questionText;
+
+        const allAnswers = shuffleArray([q, ...pickRandomWords(q, 3)]).map(
+          (w) => (isEnToVi ? w.vi : w.en)
+        );
+
+        const answerBox = document.getElementById("answers");
+        answerBox.innerHTML = "";
+        allAnswers.forEach((ans) => {
+          const btn = document.createElement("button");
+          btn.textContent = ans;
+          btn.onclick = () => {
+            if (ans === correct) {
+              currentQuestion++;
+              nextQuestion();
+            } else {
+              showWrongAnswerPopup(() => {
+                lives--;
+                lives <= 0 ? endGame() : nextQuestion();
+              });
+            }
+          };
+          answerBox.appendChild(btn);
+        });
+      }
+    </script>
   </body>
 </html>
