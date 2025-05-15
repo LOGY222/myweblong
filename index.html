@@ -157,103 +157,38 @@
       </ul>
     </nav>
 
-    <div class="content active" id="home">
-      <h1 style="margin-top: 60px">🎓 Chào mừng!</h1>
-      <p>Chọn mục trên menu để bắt đầu.</p>
-    </div>
-
-    <div class="content" id="vocab">
-      <h2>📘 Danh sách từ vựng</h2>
-      <ul id="vocab-list"></ul>
-    </div>
-
     <div class="content" id="game">
       <h2>🧠 Trò chơi luyện tập</h2>
+
+      <!-- Thêm phần chọn mức độ -->
+      <div id="level-select" style="margin-bottom: 20px">
+        <button onclick="startGame(20)">Bình thường (20 câu)</button>
+        <button onclick="startGame(50)">Khó (50 câu)</button>
+        <button onclick="startGame(100)">Siêu khó (100 câu)</button>
+      </div>
+
       <div class="status-bar" id="status"></div>
-      <div class="question-box" id="question-box">
+
+      <div class="question-box" id="question-box" style="display: none">
         <div id="question">Câu hỏi...</div>
         <div class="answers" id="answers"></div>
       </div>
+
       <div class="summary" id="summary"></div>
+
       <div class="buttons" id="end-buttons" style="display: none">
         <button onclick="showPage('home')">🏠 Trang chủ</button>
         <button onclick="showPage('vocab')">📘 Từ vựng</button>
-        <button onclick="startGame()">🔁 Chơi lại</button>
+        <!-- sửa lại gọi startGame với biến selectedCount -->
+        <button onclick="startGame(selectedCount)">🔁 Chơi lại</button>
       </div>
     </div>
 
     <script>
-      const words = [
-        { en: "apple", vi: "quả táo" },
-        { en: "dog", vi: "con chó" },
-        { en: "cat", vi: "con mèo" },
-        { en: "house", vi: "ngôi nhà" },
-        { en: "school", vi: "trường học" },
-        { en: "book", vi: "quyển sách" },
-        { en: "car", vi: "xe hơi" },
-        { en: "banana", vi: "quả chuối" },
-        { en: "teacher", vi: "giáo viên" },
-        { en: "student", vi: "học sinh" },
-
-        { en: "water", vi: "nước" },
-        { en: "milk", vi: "sữa" },
-        { en: "bread", vi: "bánh mì" },
-        { en: "chair", vi: "ghế" },
-        { en: "table", vi: "bàn" },
-        { en: "window", vi: "cửa sổ" },
-        { en: "door", vi: "cánh cửa" },
-        { en: "sun", vi: "mặt trời" },
-        { en: "moon", vi: "mặt trăng" },
-        { en: "star", vi: "ngôi sao" },
-
-        { en: "pen", vi: "bút mực" },
-        { en: "pencil", vi: "bút chì" },
-        { en: "notebook", vi: "sổ tay" },
-        { en: "bag", vi: "cái túi" },
-        { en: "shirt", vi: "áo sơ mi" },
-        { en: "pants", vi: "quần dài" },
-        { en: "shoes", vi: "giày" },
-        { en: "hat", vi: "mũ" },
-        { en: "clock", vi: "đồng hồ" },
-        { en: "phone", vi: "điện thoại" },
-
-        { en: "bed", vi: "giường" },
-        { en: "pillow", vi: "gối" },
-        { en: "blanket", vi: "chăn" },
-        { en: "floor", vi: "sàn nhà" },
-        { en: "wall", vi: "bức tường" },
-        { en: "ceiling", vi: "trần nhà" },
-        { en: "light", vi: "ánh sáng" },
-        { en: "fan", vi: "quạt" },
-        { en: "television", vi: "tivi" },
-        { en: "computer", vi: "máy tính" },
-
-        { en: "mouse", vi: "chuột" },
-        { en: "keyboard", vi: "bàn phím" },
-        { en: "doctor", vi: "bác sĩ" },
-        { en: "nurse", vi: "y tá" },
-        { en: "hospital", vi: "bệnh viện" },
-        { en: "market", vi: "chợ" },
-        { en: "restaurant", vi: "nhà hàng" },
-        { en: "food", vi: "thức ăn" },
-        { en: "drink", vi: "đồ uống" },
-        { en: "juice", vi: "nước ép" },
-
-        { en: "coffee", vi: "cà phê" },
-        { en: "tea", vi: "trà" },
-        { en: "rice", vi: "cơm" },
-        { en: "fish", vi: "cá" },
-        { en: "chicken", vi: "gà" },
-        { en: "egg", vi: "trứng" },
-        { en: "meat", vi: "thịt" },
-        { en: "vegetable", vi: "rau" },
-        { en: "fruit", vi: "trái cây" },
-        { en: "soup", vi: "súp" },
-      ];
-
       let currentQuestion = 0,
         lives = 5,
         gameWords = [];
+      selectedCount = 20;
 
       function toggleMenu() {
         const menu = document.getElementById("menu");
@@ -268,8 +203,16 @@
         document.getElementById("menu").style.display = "none";
         document.getElementById("exit-btn").style.display =
           id === "game" ? "block" : "none";
+
         if (id === "vocab") showVocab();
-        if (id === "game") startGame();
+
+        if (id === "game") {
+          // Hiện phần chọn mức độ, ẩn câu hỏi và summary
+          document.getElementById("level-select").style.display = "block";
+          document.getElementById("question-box").style.display = "none";
+          document.getElementById("summary").textContent = "";
+          document.getElementById("end-buttons").style.display = "none";
+        }
       }
 
       function showVocab() {
@@ -282,12 +225,14 @@
         });
       }
 
-      function startGame() {
+      function startGame(count) {
+        selectedCount = count;
         currentQuestion = 0;
         lives = 5;
-        gameWords = shuffleArray([...words]).slice(0, 20);
+        gameWords = shuffleArray([...words]).slice(0, selectedCount);
         document.getElementById("summary").textContent = "";
         document.getElementById("end-buttons").style.display = "none";
+        document.getElementById("level-select").style.display = "none";
         document.getElementById("question-box").style.display = "block";
         nextQuestion();
       }
@@ -376,74 +321,30 @@
         return shuffleArray(words.filter((w) => w !== exclude)).slice(0, count);
       }
     </script>
-    <audio id="backgroundMusic" autoplay hidden></audio>
+
     <script>
-      const musicMap = {
-        5: ["music/folder5/yung kai - blue (Lyrics).mp3"],
-        4: ["music/folder4/tous les mêmes.mp3"],
-        3: ["music/folder3/SLAVA.mp3"],
-        2: ["music/folder2/7 Years.mp3"],
-        1: ["music/folder1/Spider Dance.mp3"],
-      };
+      let words = [];
 
-      // Hàm phát nhạc tùy theo số tim
-      function playMusicByHeart(heartCount, questionNumber) {
-        if (questionNumber >= 2 && heartCount >= 1 && heartCount <= 5) {
-          const musicList = musicMap[heartCount];
-          if (musicList && musicList.length > 0) {
-            const randomIndex = Math.floor(Math.random() * musicList.length);
-            const musicPath = musicList[randomIndex];
-
-            const audio = document.getElementById("backgroundMusic");
-            audio.src = musicPath;
-            audio.play();
-          }
-        }
-      }
-
-      // Cập nhật lại hàm nextQuestion để gọi playMusicByHeart
-      function nextQuestion() {
-        if (lives <= 0 || currentQuestion >= gameWords.length) return endGame();
-
-        // Phát nhạc theo số tim hiện tại
-        playMusicByHeart(lives, currentQuestion + 1);
-
-        const q = gameWords[currentQuestion];
-        const isEnToVi = Math.random() > 0.5;
-        const correct = isEnToVi ? q.vi : q.en;
-        const questionText = isEnToVi
-          ? `Từ "${q.en}" nghĩa là gì?`
-          : `Từ "${q.vi}" là gì trong tiếng Anh?`;
-        document.getElementById(
-          "status"
-        ).textContent = `❤️ Mạng: ${lives} | 🔢 Câu: ${currentQuestion + 1}/${
-          gameWords.length
-        }`;
-        document.getElementById("question").textContent = questionText;
-
-        const allAnswers = shuffleArray([q, ...pickRandomWords(q, 3)]).map(
-          (w) => (isEnToVi ? w.vi : w.en)
-        );
-
-        const answerBox = document.getElementById("answers");
-        answerBox.innerHTML = "";
-        allAnswers.forEach((ans) => {
-          const btn = document.createElement("button");
-          btn.textContent = ans;
-          btn.onclick = () => {
-            if (ans === correct) {
-              currentQuestion++;
-              nextQuestion();
-            } else {
-              showWrongAnswerPopup(() => {
-                lives--;
-                lives <= 0 ? endGame() : nextQuestion();
-              });
-            }
-          };
-          answerBox.appendChild(btn);
+      fetch("hello.text")
+        .then((response) => response.text())
+        .then((text) => {
+          words = text
+            .trim()
+            .split("\n")
+            .map((line) => {
+              const [en, vi] = line.split("|").map((s) => s.trim());
+              return { en, vi };
+            });
         });
-      }
     </script>
+    <div class="content active" id="home">
+      <h1>Chào mừng đến với web!</h1>
+      <p>Chọn mục trong menu để bắt đầu.</p>
+    </div>
+
+    <div class="content" id="vocab">
+      <h2>📚 Danh sách từ vựng</h2>
+      <ul id="vocab-list"></ul>
+    </div>
   </body>
 </html>
