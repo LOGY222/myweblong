@@ -159,12 +159,93 @@
 
     <div class="content" id="game">
       <h2>🧠 Trò chơi luyện tập</h2>
+      <div
+        class="content"
+        id="game"
+        style="
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          min-height: 10vh;
+        "
+      >
+        <!-- Nội dung ở đây -->
+      </div>
 
       <!-- Thêm phần chọn mức độ -->
-      <div id="level-select" style="margin-bottom: 20px">
-        <button onclick="startGame(20)">Bình thường (20 câu)</button>
-        <button onclick="startGame(50)">Khó (50 câu)</button>
-        <button onclick="startGame(100)">Siêu khó (100 câu)</button>
+      <div
+        id="level-select"
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          align-items: center;
+          margin-bottom: 20px;
+        "
+      >
+        <button
+          onclick="startGame(20)"
+          style="
+            width: 250px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: background 0.2s ease, transform 0.1s ease;
+          "
+          onmouseover="this.style.background='white'; this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='none'"
+        >
+          Bình thường (20 câu)
+        </button>
+
+        <button
+          onclick="startGame(50)"
+          style="
+            width: 250px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: background 0.2s ease, transform 0.1s ease;
+          "
+          onmouseover="this.style.background='white'; this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='none'"
+        >
+          Khó (50 câu)
+        </button>
+
+        <button
+          onclick="startGame(100)"
+          style="
+            width: 250px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: background 0.2s ease, transform 0.1s ease;
+          "
+          onmouseover="this.style.background='white'; this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.9)'; this.style.transform='none'"
+        >
+          Siêu khó (100 câu)
+        </button>
       </div>
 
       <div class="status-bar" id="status"></div>
@@ -245,6 +326,7 @@
         const questionText = isEnToVi
           ? `Từ "${q.en}" nghĩa là gì?`
           : `Từ "${q.vi}" là gì trong tiếng Anh?`;
+
         document.getElementById(
           "status"
         ).textContent = `❤️ Mạng: ${lives} | 🔢 Câu: ${currentQuestion + 1}/${
@@ -252,45 +334,57 @@
         }`;
         document.getElementById("question").textContent = questionText;
 
-        const allAnswers = shuffleArray([q, ...pickRandomWords(q, 3)]).map(
-          (w) => (isEnToVi ? w.vi : w.en)
-        );
-
         const answerBox = document.getElementById("answers");
-        answerBox.innerHTML = "";
-        allAnswers.forEach((ans) => {
-          const btn = document.createElement("button");
-          btn.textContent = ans;
-          btn.onclick = () => {
-            if (ans === correct) {
-              currentQuestion++;
-              nextQuestion();
-            } else {
-              showWrongAnswerPopup(() => {
-                lives--;
-                lives <= 0 ? endGame() : nextQuestion();
-              });
-            }
-          };
-          answerBox.appendChild(btn);
-        });
+        answerBox.innerHTML = `
+                <input type="text" id="user-answer" placeholder="Nhập câu trả lời..."
+                  style="padding:10px;width:100%;font-size:16px;border-radius:8px;border:1px solid #ccc;"
+                  onkeydown="if(event.key === 'Enter') submitAnswer('${correct.replace(
+                    /'/g,
+                    "\\'"
+                  )}')" />
+                <button onclick="submitAnswer('${correct.replace(
+                  /'/g,
+                  "\\'"
+                )}')"
+                  style="margin-top:10px;padding:10px 15px;border:none;background:#333;color:#fff;border-radius:8px;cursor:pointer;">
+                  Trả lời
+                </button>
+              `;
+      }
+
+      function submitAnswer(correctAnswer) {
+        const userInput = document
+          .getElementById("user-answer")
+          .value.trim()
+          .toLowerCase();
+        const correct = correctAnswer.trim().toLowerCase();
+
+        if (userInput === correct) {
+          currentQuestion++;
+          nextQuestion();
+        } else {
+          showWrongAnswerPopup(() => {
+            lives--;
+            lives <= 0 ? endGame() : nextQuestion();
+          });
+        }
       }
 
       function showWrongAnswerPopup(callback) {
         const popup = document.createElement("div");
         popup.style = `
-        position: fixed; top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        background: #fff; color: #000;
-        padding: 20px; border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      `;
+                    position: fixed; top: 50%; left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #fff; color: #000;
+                    padding: 20px; border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                  `;
         popup.innerHTML = `
-        <p>❌ Bạn đã trả lời sai!</p>
-        <button style="margin-top:10px;padding:5px 15px;
-          border:none;background:#333;color:#fff;
-          border-radius:5px;cursor:pointer;">Đóng</button>
-      `;
+                    <p>❌ Bạn đã trả lời sai!</p>
+                    <button style="margin-top:10px;padding:5px 15px;
+                      border:none;background:#333;color:#fff;
+                      border-radius:5px;cursor:pointer;">Đóng</button>
+                  `;
         document.body.appendChild(popup);
         document
           .querySelectorAll("#answers button")
